@@ -6,6 +6,12 @@
 
 sre_bots:
   hosts:
-    sretest
+    HOSTNAME
+  vars:
+    broker_ip: 127.0.0.1
+    host_name: Srv-Mon02
+	bots:
+	  - path1
+	  - path2
 
 ```

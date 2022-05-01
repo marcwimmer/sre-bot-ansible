@@ -1,0 +1,15 @@
+---
+
+- set_fact:
+    src_dir_parent: "/usr/local/src"
+    openssl_install_dir: /var/lib/python_sre_openssl
+    openssl_version: 1.1.1d
+    conf_autobot: /etc/sre/autobot.conf
+
+- name: Python version short 3.8.3 --> 3.8
+  set_fact:
+    python_version_abbreviated: "{{ '.'.join(python_version.split('.')[:2])}}"
+
+- set_fact:
+    src_dir: "{{ src_dir_parent }}/Python-{{python_version}}"
+

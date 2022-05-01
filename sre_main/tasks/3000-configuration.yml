@@ -1,0 +1,19 @@
+---
+
+- name: provide autobot.conf
+  template:
+    src: ../files/autobot.conf
+    dest: "{{ conf_autobot }}"
+
+- name: update autobot.conf
+  command: /usr/bin/python3
+  args:
+    stdin: |
+      from pathlib import Path
+      import json
+
+      file = Path("{{ conf_autobot }}")
+      content = eval(file.read_text())
+      bots = eval("{{ bots }}")
+      content['bots-paths'] = bots
+      file.write_text(json.dumps(content, indent=4))
