@@ -1,0 +1,9 @@
+---
+- hosts: sre_bots
+  roles:
+    - role: sre_main
+      vars:
+        - venv_dir: /var/lib/sre_bot_env
+        - python_version: 3.9.7
+        - compile_python: true
+        - rebuild: false

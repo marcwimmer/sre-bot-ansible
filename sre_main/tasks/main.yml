@@ -1,0 +1,130 @@
+---
+- name: Add the user sre
+  ansible.builtin.user:
+    name: sre
+    comment: Site Reliability Things
+
+- name: make etc directory
+  file:
+    path: /etc/sre
+    state: directory
+    owner: root
+    group: root
+
+- set_fact:
+    src_dir_parent: "/usr/local/src"
+
+- name: Python version short 3.8.3 --> 3.8
+  set_fact:
+    python_version_abbreviated: "{{ '.'.join(python_version.split('.')[:2])}}"
+    src_dir: "{{ src_dir_parent }}/Python-{{python_version}}"
+    openssl_install_dir: /var/lib/python_sre_openssl
+    openssl_version: 1.1.1d
+
+- name: clean source dir if required
+  file:
+    state: absent
+    path: "{{ src_dir }}"
+  when: rebuild
+
+- name: "Building python {{python_version}}"
+  block:
+
+  - name: install openssl
+    shell:
+      cmd: |
+        set -x
+        cd /tmp
+        tarfile=/tmp/openssl.tar.gz
+        if [[ ! -d "{{ openssl_install_dir }}" ]]; then
+          wget https://www.openssl.org/source/openssl-{{ openssl_version }}.tar.gz -O $tarfile
+          tar -xzf $tarfile
+          mv /tmp/openssl-{{ openssl_version }} "{{ openssl_install_dir }}"
+        fi
+        cd "{{ openssl_install_dir }}"
+        ./config --prefix={{ openssl_install_dir }} --openssldir={{ openssl_install_dir }}
+        make -j4
+        make test
+        make install
+      executable: /bin/bash
+
+  - name: install apt packages for ssl
+    shell:
+      cmd: |
+        apt-get install -y libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+  - name: install rpm packages for ssl
+    shell:
+      cmd: |
+        apt update
+        apt-get install -y libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev
+        exit -1
+    when: ansible_distribution == 'CentOS'
+
+  - name: Check if / exists
+    stat:
+      path: "{{ src_dir }}"
+    register: src_dir_exists
+
+  - name: extract
+    unarchive:
+      src: "https://www.python.org/ftp/python/{{python_version}}/Python-{{python_version}}.tgz"
+      dest: "{{ src_dir | dirname }}"
+      remote_src: true
+    when: not src_dir_exists.stat.exists
+
+  - name: build
+    shell:
+      chdir: "{{ src_dir }}"
+      cmd: |
+        ./configure --with-ssl --enable-optimizations
+        make -j4
+        make altinstall
+
+- name: make env
+  shell:
+    chdir: "{{ venv_dir | dirname }}"
+    cmd: "/usr/local/bin/python{{python_version_abbreviated}} -mvenv {{ venv_dir | basename }}"
+
+- name: setup pip packages
+  shell:
+    chdir: "{{ venv_dir }}"
+    cmd: |
+      . {{venv_dir}}/bin/activate
+      python -mpip install pip --upgrade
+      python -mpip install wheel
+      # python -mpip install sre-bot
+
+- name: A helpful reminder of what to look out for post-update
+  pause:
+    prompt: "pause check it"
+
+- name: Check if /etc/autobot.conf exists
+  stat:
+    path: /etc/autobot.conf
+  register: stat_result_etc_autobot
+
+- name: provide autobot.conf
+  template:
+    src: ../files/autobot.conf
+    dest: /etc/sre/autobot.conf
+  when: not stat_result_etc_autobot.stat.exists
+
+# - name: install myservice systemd unit file
+#   template: src=../files/systemd.conf dest=/etc/systemd/system/autobot.service
+
+# - name: start myservice
+#   systemd:state=started name=autobot daemon_reload=yes
+
+- name: Make sure autobot service is running
+  systemd: state=started name=autobot
+
+# - name: Make autobot executable in path
+#   copy:
+#     content: |
+#       #!/usr/bin/env bash
+#       {{venv_dir}}/bin/python /home/sre/bot/autobot.py "$@"
+#     dest: /usr/local/bin/autobot
+#     mode: 0555
+
