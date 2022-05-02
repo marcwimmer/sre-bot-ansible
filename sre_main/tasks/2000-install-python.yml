@@ -94,5 +94,5 @@
       set -x
       . {{venv_dir}}/bin/activate
       python -mpip install {{ item }} -U --force-reinstall
-  when: "{{ pip is defined and pip }}"
+  when: pip is defined and pip
   loop: "{{ pip }}"
