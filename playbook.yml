@@ -4,6 +4,7 @@
     - role: sre_main
       vars:
         - venv_dir: /var/lib/sre_bot_env
-        - python_version: 3.9.7
+        # - python_version: 3.9.7
+        - python_version: 3.10.4
         - compile_python: true
         - rebuild: false

@@ -1,7 +1,9 @@
 ---
 - include_tasks: 1000-facts.yml
 
-- include_tasks: 2000-installautobot.yml
+- include_tasks: 1500-clean.yml
+
+- include_tasks: 2000-install-python.yml
 
 - include_tasks: 3000-configuration.yml
 

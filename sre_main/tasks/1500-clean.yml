@@ -1,0 +1,12 @@
+---
+- name: clean source dir if required
+  file:
+    state: absent
+    path: "{{ src_dir }}"
+  when: rebuild
+
+- name: venv dir if required
+  file:
+    state: absent
+    path: "{{ venv_dir }}"
+  when: rebuild

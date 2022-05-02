@@ -13,5 +13,17 @@ sre_bots:
 	bots:
 	  - path1
 	  - path2
+	pip:
+	  - sre-bot-slack
+	  - sre-bot-zabbix
+
+	configs:
+		- name: /etc/sre/zabbix.conf
+		value: |
+			{
+			"url": "http://localhost:8888",
+			"user": "Admin",
+			"password": "*********"
+			}
 
 ```

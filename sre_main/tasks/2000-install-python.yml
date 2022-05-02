@@ -1,10 +1,4 @@
 ---
-- name: clean source dir if required
-  file:
-    state: absent
-    path: "{{ src_dir }}"
-  when: rebuild
-
 - name: Check if venv-dir exists
   stat:
     path: "{{ venv_dir }}"
@@ -26,12 +20,13 @@
         lzma lzma-dev tk-dev uuid-dev zlib1g-dev
     when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
-  - name: install rpm packages for ssl
+  - name: install centos packages
     shell:
       cmd: |
-        apt update
-        apt-get install -y libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev
-        exit -1
+        # https://www.workaround.cz/howto-build-compile-install-latest-python-310-39-38-37-centos-7-8-9/
+        yum update
+        # yum -y install libffi-devel ncurses-devel readline-devel openssl-devel xz-devel gdbm-devel zlib-devel uuid-devel libsqlite3x-devel bzip2-devel tk-devel sqlite-devel wget yum-utils gcc
+        yum -y install wget yum-utils gcc openssl-devel bzip2-devel libffi-devel
     when: ansible_distribution == 'CentOS'
 
   - name: Check if {{ src_dir }} exists
@@ -46,21 +41,30 @@
       remote_src: true
     when: not src_dir_exists.stat.exists
 
-  - name: build
+  - name: build debian
     shell:
       chdir: "{{ src_dir }}"
       cmd: |
         ./configure --enable-optimizations
         make -j4
         make altinstall
-  when: not stat_result_venv.stat.exists
+    when: not stat_result_venv.stat.exists and (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
+
+  - name: build centos
+    shell:
+      chdir: "{{ src_dir }}"
+      cmd: |
+        ./configure --with-system-ffi --with-computed-gotos --enable-loadable-sqlite-extensions
+        make -j4
+        make altinstall
+    when: not stat_result_venv.stat.exists and ansible_distribution == 'CentOS'
 
 - name: make env
   shell:
     chdir: "{{ venv_dir | dirname }}"
     cmd: "/usr/local/bin/python{{python_version_abbreviated}} -mvenv {{ venv_dir | basename }}"
 
-- name: setup pip packages
+- name: setup base pip packages
   shell:
     chdir: "{{ venv_dir }}"
     cmd: |
@@ -68,3 +72,12 @@
       python -mpip install pip --upgrade
       python -mpip install wheel
       python -mpip install sre-bot
+
+- name: setup configured pip packages
+  shell:
+    chdir: "{{ venv_dir }}"
+    cmd: |
+      set -x
+      . {{venv_dir}}/bin/activate
+      python -mpip install $(python -c 'print(" ".join(eval('{{ pip }}')))')
+  when: "{{ pip }}"
