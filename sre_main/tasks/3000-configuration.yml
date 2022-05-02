@@ -13,7 +13,7 @@
 
 - name: update {{ conf_autobot }}
   shell:
-    cmd: sre add-bot-path '{{ item }}'
+    cmd: sre add-bot-path '{{ item.path }}'
   with_items: "{{ bots }}"
 
 - name: deploy configurations

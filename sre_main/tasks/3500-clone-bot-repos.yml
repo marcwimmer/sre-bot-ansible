@@ -1,0 +1,43 @@
+---
+
+- set_fact:
+    repo_dir: /tmp/ansible_sre_repo
+
+- name: clone locally and transfer
+  local_action:
+    module: ansible.builtin.shell
+    cmd: |
+      rm -Rf "{{ repo_dir }}"
+
+- name: clone locally and transfer
+  local_action:
+    module: ansible.builtin.shell
+    cmd: |
+      git clone "{{ item.url }}" "{{ repo_dir }}/{{ index }}"
+  loop: "{{ bots }}"
+  loop_control:
+    index_var: index
+
+- name: clone locally and transfer
+  shell:
+    executable: /bin/bash
+    cmd: |
+      set -e
+      if [[ ! -d "{{ item.path }}" ]]; then
+        exit 0
+      fi
+      cd "{{ item.path }}"
+      if [[ ! -z "$(git status --porcelain)" ]]; then
+        echo "Repository {{ item.path }} is dirty."
+        exit -1
+      fi
+  with_items: "{{ bots }}"
+
+- name: transfer repos
+  synchronize:
+    src: "{{ repo_dir }}/{{ index }}/"
+    dest: "{{ item.path }}"
+    recursive: 1
+  loop: "{{ bots }}"
+  loop_control:
+    index_var: index

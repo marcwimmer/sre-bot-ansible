@@ -7,4 +7,6 @@
 
 - include_tasks: 3000-configuration.yml
 
+- include_tasks: 3500-clone-bot-repos.yml
+
 - include_tasks: 4000-start-service.yml
