@@ -1,9 +1,15 @@
 ---
 
+- name: Check if "{{ conf_autobot }}" exists
+  stat:
+    path: "{{ conf_autobot }}"
+  register: stat_result
+
 - name: provide {{ conf_autobot }}
   template:
     src: ../files/sre.conf
     dest: "{{ conf_autobot }}"
+  when: not stat_result.stat.exists
 
 - name: update {{ conf_autobot }}
   command: /usr/bin/python3

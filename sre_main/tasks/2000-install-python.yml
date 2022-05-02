@@ -93,6 +93,6 @@
     cmd: |
       set -x
       . {{venv_dir}}/bin/activate
-      python -mpip install {{ item }}
+      python -mpip install {{ item }} -U --force-reinstall
   when: "{{ pip is defined and pip | length > 0 }}"
   loop: "{{ pip }}"
