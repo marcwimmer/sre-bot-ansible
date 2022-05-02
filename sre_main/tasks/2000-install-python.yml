@@ -71,6 +71,7 @@
       . {{venv_dir}}/bin/activate
       python -mpip install pip --upgrade
       python -mpip install wheel
+      python -mpip install setuptools -U
       python -mpip install sre-bot
 
 - name: setup configured pip packages
@@ -80,4 +81,4 @@
       set -x
       . {{venv_dir}}/bin/activate
       python -mpip install $(python -c 'print(" ".join(eval('{{ pip }}')))')
-  when: "{{ pip }}"
+  when: "{{ pip is defined and pip | length > 0 }}"
