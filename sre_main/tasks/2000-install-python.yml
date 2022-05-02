@@ -80,5 +80,6 @@
     cmd: |
       set -x
       . {{venv_dir}}/bin/activate
-      python -mpip install $(python -c 'print(" ".join(eval('{{ pip }}')))')
+      python -mpip install {{ item }}
   when: "{{ pip is defined and pip | length > 0 }}"
+  loop: "{{ pip }}"
