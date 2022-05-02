@@ -1,11 +1,11 @@
 ---
 
-- name: provide autobot.conf
+- name: provide {{ conf_autobot }}
   template:
-    src: ../files/autobot.conf
+    src: ../files/sre.conf
     dest: "{{ conf_autobot }}"
 
-- name: update autobot.conf
+- name: update {{ conf_autobot }}
   command: /usr/bin/python3
   args:
     stdin: |
@@ -17,3 +17,9 @@
       bots = eval("{{ bots }}")
       content['bots-paths'] = bots
       file.write_text(json.dumps(content, indent=4))
+
+- name: deploy configurations
+  copy:
+    content: "{{ item.value }}"
+    dest: "{{ item.name }}"
+  with_items: "{{ configs }}"

@@ -4,7 +4,7 @@
     src_dir_parent: "/usr/local/src"
     openssl_install_dir: /var/lib/python_sre_openssl
     openssl_version: 1.1.1d
-    conf_autobot: /etc/sre/autobot.conf
+    conf_autobot: /etc/sre/sre.conf
 
 - name: Python version short 3.8.3 --> 3.8
   set_fact:
