@@ -12,17 +12,9 @@
   when: not stat_result.stat.exists
 
 - name: update {{ conf_autobot }}
-  command: /usr/bin/python3
-  args:
-    stdin: |
-      from pathlib import Path
-      import json
-
-      file = Path("{{ conf_autobot }}")
-      content = eval(file.read_text())
-      bots = eval("{{ bots }}")
-      content['bots-paths'] = bots
-      file.write_text(json.dumps(content, indent=4))
+  shell:
+    cmd: sre add-bot-path '{{ item }}'
+  with_items: "{{ bots }}"
 
 - name: deploy configurations
   copy:
