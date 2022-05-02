@@ -5,11 +5,11 @@
 
 - name: clone locally and transfer
   local_action:
-    module: ansible.builtin.shell
-    cmd: |
-      rm -Rf "{{ repo_dir }}"
+    module: ansible.builtin.file
+    state: absent
+    path: "{{ repo_dir }}"
 
-- name: clone locally and transfer
+- name: clean temp directory for repos
   local_action:
     module: ansible.builtin.shell
     cmd: |
@@ -27,6 +27,7 @@
         exit 0
       fi
       cd "{{ item.path }}"
+      git config --global --add safe.directory "{{ item.path }}"
       if [[ ! -z "$(git status --porcelain)" ]]; then
         echo "Repository {{ item.path }} is dirty."
         exit -1
