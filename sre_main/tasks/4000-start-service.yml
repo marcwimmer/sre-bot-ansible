@@ -4,20 +4,10 @@
     chdir: "{{ venv_dir }}"
     cmd: |
       sre install
-
-# - name: install myservice systemd unit file
-#   template: src=../files/systemd.conf dest=/etc/systemd/system/autobot.service
+      systemctl restart sre
 
 - name: start sre systemd service
   systemd: state=started name=sre daemon_reload=yes
 
 - name: Make sure autobot service is running
   systemd: state=started name=sre
-
-# - name: Make autobot executable in path
-#   copy:
-#     content: |
-#       #!/usr/bin/env bash
-#       {{venv_dir}}/bin/python /home/sre/bot/autobot.py "$@"
-#     dest: /usr/local/bin/autobot
-#     mode: 0555
