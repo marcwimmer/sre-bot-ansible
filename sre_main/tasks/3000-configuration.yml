@@ -11,6 +11,26 @@
     dest: "{{ conf_autobot }}"
   when: not stat_result.stat.exists
 
+- name: update certain settings in {{ conf_autobot }}
+  shell:
+    executable: python3
+    cmd: |
+      from pathlib import Path
+      import json
+      file = Path("{{ conf_autobot }}")
+      conf = eval(file.read_text())
+
+      conf['name'] = "{{host_name}}"
+      conf['broker']['ip'] = "{{ broker_ip }}"
+      if "{{ broker_port | default('') }}":
+        conf['broker']['port'] = {{ broker_port }}
+      if "{{ http_port }}":
+        conf['http_port'] = {{ http_port }}
+      if "{{ http_address }}":
+        conf['http_address'] = '{{ http_address }}'
+
+      file.write_text(json.dumps(conf, indent=4))
+
 - name: update {{ conf_autobot }}
   shell:
     cmd: sre add-bot-path '{{ item.path }}'

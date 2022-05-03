@@ -12,4 +12,7 @@
 
 - set_fact:
     src_dir: "{{ src_dir_parent }}/Python-{{python_version}}"
+    broker_port: "{{ broker_port | default(1883) }}"
+    http_port: "{{ broker_port | default(8520) }}"
+    http_address: "{{ http_address | default('0.0.0.0') }}"
 
