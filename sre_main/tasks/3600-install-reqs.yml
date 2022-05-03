@@ -1,0 +1,14 @@
+---
+
+- name: install requirements.txt
+  shell:
+    chdir: "{{ venv_dir }}"
+    executable: /bin/bash
+    cmd: |
+      cd "{{ item.path }}"
+      set -e
+      if [[ -f requirements.txt ]]; then
+        . {{venv_dir}}/bin/activate
+        python -mpip install -r requirements.txt
+      fi
+  loop: "{{ bots }}"
