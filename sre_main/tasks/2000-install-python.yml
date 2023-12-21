@@ -32,7 +32,7 @@
         yum -y install wget yum-utils gcc openssl-devel bzip2-devel libffi-devel
     when: ansible_distribution == 'CentOS'
 
-  - name: Check if {{ src_dir }} exists
+  - name: "Check if {{ src_dir }} exists"
     stat:
       path: "{{ src_dir }}"
     register: src_dir_exists

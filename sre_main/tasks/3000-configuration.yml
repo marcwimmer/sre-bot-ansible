@@ -1,6 +1,6 @@
 ---
 
-- name: Check if "{{ conf_autobot }}" exists
+- name: "Check if "{{ conf_autobot }}" exists"
   stat:
     path: "{{ conf_autobot }}"
   register: stat_result
